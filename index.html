@@ -5,55 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>职业兴趣 & 职业锚测评</title>
 
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- html2canvas -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- html2pdf -->
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
 <style>
 /* ============================================================
-   Part 1：基础样式（App 通用风格）
+   全站 UI —— 商业蓝主题
    ============================================================ */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f5f7fb;
 }
+
 #app {
-  max-width: 640px;
+  max-width: 720px;
   margin: auto;
   padding: 20px;
 }
+
+/* 卡片样式 */
 .card {
   background: #fff;
-  padding: 22px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 26px;
+  border-radius: 14px;
+  margin-bottom: 26px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
 }
+
+/* 按钮 */
 .btn {
-  background: #4CAF50;
+  background: #1e60ff;
   color: white;
-  padding: 12px 16px;
+  padding: 14px 20px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
+  font-size: 16px;
 }
 .btn:disabled {
-  background: #ccc;
+  background: #9bb6ff;
 }
+
+/* 顶部进度条 */
+.progress-container {
+  width: 100%;
+  background: #e5e7ef;
+  height: 8px;
+  border-radius: 4px;
+  margin: 12px 0 24px 0;
+}
+.progress-bar {
+  height: 8px;
+  background: #1e60ff;
+  width: 0%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* 选项风格 */
 .option {
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   margin: 10px 0;
+  border: 1px solid #cfd7e6;
   cursor: pointer;
+  font-size: 16px;
+}
+.option:hover {
+  background: #eef4ff;
 }
 </style>
 </head>
-
 <body>
+
 <div id="app"></div>
 
 <!-- ============================================================
-   Part 2：测评题库（已检查无重复，保持原样）
+   Part 2：题库（60 题，无重复）
    ============================================================ -->
 <script>
 const questions = [
+  /* R */
   { type: "R", text: "我喜欢使用工具或机器完成任务。" },
   { type: "R", text: "相比办公室工作，我更喜欢动手操作。" },
   { type: "R", text: "我擅长修理或手工制作。" },
@@ -61,6 +100,7 @@ const questions = [
   { type: "R", text: "我更喜欢实际、具体的工作。" },
   { type: "R", text: "我喜欢按照流程完成任务。" },
 
+  /* I */
   { type: "I", text: "我喜欢思考复杂问题。" },
   { type: "I", text: "我享受探索事物背后的原理。" },
   { type: "I", text: "我擅长分析数据或信息。" },
@@ -68,6 +108,7 @@ const questions = [
   { type: "I", text: "我对新知识充满好奇。" },
   { type: "I", text: "我更喜欢逻辑和推理类任务。" },
 
+  /* A */
   { type: "A", text: "我喜欢创造性的工作方式。" },
   { type: "A", text: "我对设计、艺术或表达感兴趣。" },
   { type: "A", text: "我喜欢自己决定工作方式，不受限制。" },
@@ -75,6 +116,7 @@ const questions = [
   { type: "A", text: "我喜欢尝试不同风格或新点子。" },
   { type: "A", text: "我在想象和表达方面有优势。" },
 
+  /* S */
   { type: "S", text: "我喜欢帮助别人解决问题。" },
   { type: "S", text: "我能体会他人的情绪和想法。" },
   { type: "S", text: "我喜欢与人沟通交流。" },
@@ -82,6 +124,7 @@ const questions = [
   { type: "S", text: "我希望我的工作能帮助他人发展。" },
   { type: "S", text: "我适合在团队氛围良好的地方工作。" },
 
+  /* E */
   { type: "E", text: "我喜欢制定计划和推动事情进展。" },
   { type: "E", text: "我喜欢影响、说服或带领他人。" },
   { type: "E", text: "我愿意承担责任并做决策。" },
@@ -89,6 +132,7 @@ const questions = [
   { type: "E", text: "我适合需要沟通和协调的工作。" },
   { type: "E", text: "我喜欢创立、组织或管理项目。" },
 
+  /* C */
   { type: "C", text: "我擅长整理、记录或处理细节。" },
   { type: "C", text: "我喜欢有结构、稳定的工作环境。" },
   { type: "C", text: "我习惯按流程、规则完成任务。" },
@@ -96,43 +140,50 @@ const questions = [
   { type: "C", text: "我做事细致、有条理。" },
   { type: "C", text: "我喜欢可预测的任务，而非不确定性。" },
 
+  /* TF */
   { type: "TF", text: "我希望我的工作能体现专业技能价值。" },
   { type: "TF", text: "我愿意花时间钻研某项技能做到最好。" },
   { type: "TF", text: "我认为专业能力比职位更重要。" },
 
+  /* GM */
   { type: "GM", text: "我希望未来能管理团队或项目。" },
   { type: "GM", text: "我喜欢协调资源、推动决策。" },
   { type: "GM", text: "我适合承担更大责任。" },
 
+  /* AU */
   { type: "AU", text: "我希望工作方式由我自己决定。" },
   { type: "AU", text: "我不喜欢严格的流程束缚。" },
   { type: "AU", text: "我喜欢自由安排时间和任务。" },
 
+  /* SE */
   { type: "SE", text: "我重视工作稳定性。" },
   { type: "SE", text: "我偏好长期可预期的职业路径。" },
   { type: "SE", text: "我在稳定环境里更能发挥。" },
 
+  /* CE */
   { type: "CE", text: "我喜欢从零开始创造一个项目。" },
   { type: "CE", text: "我有创业或创新驱动力。" },
   { type: "CE", text: "我喜欢承担风险，尝试新机会。" },
 
+  /* SV */
   { type: "SV", text: "我希望我的工作能帮助他人。" },
   { type: "SV", text: "我重视工作的社会意义。" },
   { type: "SV", text: "我愿意为了他人的利益付出努力。" },
 
+  /* CH */
   { type: "CH", text: "我喜欢克服困难和挑战。" },
   { type: "CH", text: "我对艰难目标充满动力。" },
   { type: "CH", text: "我希望不断验证自己的能力。" },
 
+  /* LS */
   { type: "LS", text: "我重视工作与生活的平衡。" },
   { type: "LS", text: "我不会为了工作牺牲生活质量。" },
   { type: "LS", text: "我希望工作能支持我的生活方式。" }
 ];
 </script>
 
-
 <!-- ============================================================
-   Part 3：测评流程（上一题 / 下一题 + 无付费 + 无记录）
+   Part 3：测评逻辑 + 进度条
    ============================================================ -->
 <script>
 let currentIndex = 0;
@@ -143,45 +194,59 @@ const scoresAnchor = { TF:0, GM:0, AU:0, SE:0, CE:0, SV:0, CH:0, LS:0 };
 
 function renderHome() {
   document.getElementById("app").innerHTML = `
-    <div class="card">
-      <h2>职业兴趣 & 职业锚测评</h2>
-      <p>共 ${questions.length} 题，约 8-10 分钟完成。</p>
-      <button class="btn" onclick="startTest()">开始测评</button>
+    <div class="card" style="margin-top:40px;">
+      <h1 style="color:#1e60ff;text-align:center;">职业兴趣 & 职业锚测评</h1>
+      <p style="text-align:center;margin-top:10px;font-size:16px;">
+        全程约 8-10 分钟 · 完整报告 · 免费获取
+      </p>
+      <button class="btn" style="margin-top:20px;width:100%;" onclick="startTest()">
+        开始测评
+      </button>
     </div>
   `;
 }
 
 function startTest() {
-  currentIndex = 0;
   answers = [];
+  currentIndex = 0;
   renderQuestion();
+}
+
+function renderProgress() {
+  const progress = ((currentIndex) / questions.length) * 100;
+  return `
+    <div class="progress-container">
+      <div class="progress-bar" style="width:${progress}%"></div>
+    </div>
+  `;
 }
 
 function renderQuestion() {
   const q = questions[currentIndex];
-  const app = document.getElementById("app");
   const saved = answers[currentIndex] ?? null;
 
-  app.innerHTML = `
+  document.getElementById("app").innerHTML = `
+    ${renderProgress()}
     <div class="card">
       <h2>第 ${currentIndex + 1} / ${questions.length} 题</h2>
-      <p>${q.text}</p>
+      <p style="font-size:18px;margin-top:8px;color:#333;">${q.text}</p>
 
-      ${[5,4,3,2,1].map(score => `
-        <div class="option" 
-          onclick="selectOption(${score})"
-          style="border:${saved===score?'2px solid #4CAF50':'1px solid #ccc'}">
-          ${score} 分
+      ${[5,4,3,2,1].map(v => `
+        <div class="option"
+          onclick="selectOption(${v})"
+          style="border:${saved===v?'2px solid #1e60ff':'1px solid #cfd7e6'}">
+          ${v} 分
         </div>
       `).join("")}
 
-      <div style="display:flex; gap:12px; margin-top:20px;">
-        <button class="btn" onclick="prev()" ${currentIndex===0?'disabled':''}>
-          上一题
-        </button>
+      <div style="display:flex;gap:12px;margin-top:24px;">
+        <button class="btn"
+          onclick="prev()"
+          ${currentIndex===0?'disabled':''}>上一题</button>
 
-        <button class="btn" onclick="next()">
-          ${currentIndex === questions.length - 1 ? "提交" : "下一题"}
+        <button class="btn" onclick="next()"
+          style="flex:1;">
+          ${currentIndex===questions.length-1?"提交":"下一题"}
         </button>
       </div>
     </div>
@@ -192,10 +257,12 @@ function selectOption(v) {
   answers[currentIndex] = v;
   renderQuestion();
 }
+
 function prev() {
   if (currentIndex > 0) currentIndex--;
   renderQuestion();
 }
+
 function next() {
   if (!answers[currentIndex]) {
     alert("请选择一个选项");
@@ -205,69 +272,279 @@ function next() {
     currentIndex++;
     renderQuestion();
   } else {
-    calculate();
+    calculateResult();
   }
 }
 
-/* ============================================================
-   计算得分
-   ============================================================ */
-function calculate() {
-  for (let i=0; i<questions.length;i++) {
+function calculateResult() {
+  for (let i=0;i<questions.length;i++){
     const q = questions[i];
     const v = answers[i];
-
-    if (scoresRIASEC[q.type] !== undefined) scoresRIASEC[q.type] += v;
-    if (scoresAnchor[q.type] !== undefined) scoresAnchor[q.type] += v;
+    if (scoresRIASEC[q.type] !== undefined) scoresRIASEC[q.type]+=v;
+    if (scoresAnchor[q.type] !== undefined) scoresAnchor[q.type]+=v;
   }
   renderReport();
 }
+</script>
+<!-- ============================================================
+   Part 4：深度分析文本（RIASEC +职业锚 —— MBTI 风格）
+   ============================================================ -->
 
+<script>
+// 每个类型的深度解读
+const RIASEC_DETAIL = {
+  R: {
+    name: "现实型（Realistic）",
+    desc: "你偏好亲手操作、具体事务与真实世界的任务。务实、直接、动手能力强。",
+    traits: ["务实稳重", "动手能力强", "喜欢明确流程", "偏好真实结果"],
+    careers: ["工程技术员", "机械维修", "建筑施工", "电力工程师", "物流管理"]
+  },
+  I: {
+    name: "研究型（Investigative）",
+    desc: "你对探索原理、分析问题、研究数据有强烈兴趣。理性、好奇、独立思考。",
+    traits: ["逻辑性强", "好奇心高", "喜欢深度研究", "重视知识增长"],
+    careers: ["数据分析师", "科研人员", "程序员", "生物/化学研究", "战略分析"]
+  },
+  A: {
+    name: "艺术型（Artistic）",
+    desc: "你喜欢表达、创意、多样性与自由。不喜欢流程束缚，能创造新点子。",
+    traits: ["想象力强", "表达力强", "自主性强", "审美与创意敏感"],
+    careers: ["设计师", "UI/UX", "文案策划", "摄影", "内容创作者"]
+  },
+  S: {
+    name: "社会型（Social）",
+    desc: "你乐于帮助他人、沟通顺畅、共情能力强。喜欢带来积极影响。",
+    traits: ["共情力强", "沟通力强", "喜欢助人", "善于协调关系"],
+    careers: ["心理咨询", "教师", "HR", "客服", "护士/社工"]
+  },
+  E: {
+    name: "企业型（Enterprising）",
+    desc: "你喜欢影响他人、推动项目、承担责任。决策力强，善于说服。",
+    traits: ["领导力强", "行动力强", "擅长说服", "喜欢竞争与挑战"],
+    careers: ["销售经理", "市场运营", "创业者", "项目负责人", "商务拓展BD"]
+  },
+  C: {
+    name: "常规型（Conventional）",
+    desc: "你偏好结构化、秩序感、规则清晰的任务。细致、可靠、稳定。",
+    traits: ["条理性高", "认真细致", "执行力强", "重视稳定"],
+    careers: ["行政", "会计", "审计", "数据录入", "文档管理"]
+  }
+};
 
-/* ============================================================
-   Part 4：最终报告（免费开放）
-   ============================================================ */
+const ANCHOR_DETAIL = {
+  TF: {
+    name: "技术/职能型（Technical/Functional）",
+    desc: "你追求成为某一领域的专家，以专业能力作为价值体现。",
+    risks: ["可能不愿接受管理岗位", "对弱专业的团队不耐心"],
+    careers: ["工程师", "分析师", "设计师", "研究员"]
+  },
+  GM: {
+    name: "管理型（General Management）",
+    desc: "你擅长协调资源、做决策、带领团队，是天生管理人才。",
+    risks: ["执行类工作会感到压抑", "可能承担过多责任"],
+    careers: ["项目经理", "部门主管", "运营管理", "创业者"]
+  },
+  AU: {
+    name: "自主型（Autonomy）",
+    desc: "你追求自由、弹性、独立的工作方式，不喜欢被流程限制。",
+    risks: ["难以适应规章制度严格的组织"],
+    careers: ["自由职业", "创意行业", "咨询顾问"]
+  },
+  SE: {
+    name: "安全稳定型（Security）",
+    desc: "你追求可预测、长期、安全的环境。",
+    risks: ["面对变化时焦虑"],
+    careers: ["国企", "银行", "公务员", "稳定行业"]
+  },
+  CE: {
+    name: "创业创造型（Creative Entrepreneurship）",
+    desc: "你渴望创造新事物，喜欢掌控项目与冒险。",
+    risks: ["易承受压力过大", "喜欢刺激导致反复换方向"],
+    careers: ["创业者", "产品负责人", "创新岗位"]
+  },
+  SV: {
+    name: "服务奉献型（Service）",
+    desc: "你希望工作能帮助他人，实现社会价值。",
+    risks: ["容易情绪耗竭"],
+    careers: ["心理咨询", "教育行业", "公益机构"]
+  },
+  CH: {
+    name: "挑战型（Challenge）",
+    desc: "你从困难、竞争、突破中获得满足。",
+    risks: ["压力过多", "工作与生活失衡"],
+    careers: ["销售", "咨询", "金融高压部门"]
+  },
+  LS: {
+    name: "生活型（Lifestyle）",
+    desc: "你追求生活优先，重视平衡与自由。",
+    risks: ["可能错过晋升机会"],
+    careers: ["远程办公类岗位", "兼职性质岗位"]
+  }
+};
+</script>
+
+<!-- ============================================================
+   Part 5：最终报告渲染（含图表、文本、总结、职业推荐）
+   ============================================================ -->
+<script>
 function renderReport() {
-  const app = document.getElementById("app");
-
   const topRIASEC = Object.entries(scoresRIASEC)
     .sort((a,b)=>b[1]-a[1])
-    .slice(0,3)
     .map(v=>v[0])
-    .join("");
+    .slice(0,3);
 
   const topAnchor = Object.entries(scoresAnchor)
     .sort((a,b)=>b[1]-a[1])[0][0];
 
-  app.innerHTML = `
-    <div class="card">
-      <h2>测评完成！</h2>
-      <p>你的 RIASEC 三字码：<strong>${topRIASEC}</strong></p>
-      <p>你的主要职业锚：<strong>${topAnchor}</strong></p>
+  const [A1, A2, A3] = topRIASEC;
 
-      <button class="btn" onclick="exportPDF()">导出 PDF 报告</button>
-      <button class="btn" onclick="renderHome()">返回首页</button>
+  document.getElementById("app").innerHTML = `
+    <div class="card" id="reportArea">
+
+      <h1 style="color:#1e60ff;text-align:center;margin-bottom:4px;">
+        职业兴趣 & 职业锚测评报告
+      </h1>
+      <p style="text-align:center;color:#666;margin-bottom:20px;">
+        专业版报告（免费获取）
+      </p>
+
+      <!-- 核心结果 -->
+      <h2>你的主要职业兴趣</h2>
+      <p style="font-size:20px;color:#1e60ff;">
+        ${A1} - ${A2} - ${A3}（前三类型）
+      </p>
+
+      <h2>你的职业锚</h2>
+      <p style="font-size:20px;color:#1e60ff;">${ANCHOR_DETAIL[topAnchor].name}</p>
+
+      <canvas id="radarChart" style="margin-top:20px;"></canvas>
+
+      <h2 style="margin-top:30px;">你的职业兴趣深度解读</h2>
+      ${renderRIASECDetail(A1)}
+      ${renderRIASECDetail(A2)}
+      ${renderRIASECDetail(A3)}
+
+      <h2 style="margin-top:30px;">你的职业锚深度解读</h2>
+      ${renderAnchorDetail(topAnchor)}
+
+      <h2 style="margin-top:30px;">综合职业推荐</h2>
+      ${renderCareerSuggestion(A1, A2, A3, topAnchor)}
+
+      <div style="margin-top:40px;display:flex;gap:12px;">
+        <button class="btn" onclick="exportPDF()" style="flex:1;">导出 PDF</button>
+        <button class="btn" onclick="generatePoster()" style="flex:1;">生成海报</button>
+      </div>
+    </div>
+
+    <div id="posterArea" style="display:none;"></div>
+  `;
+
+  drawRadar();
+}
+
+/* ---- 输出 RIASEC 文本 ---- */
+function renderRIASECDetail(type) {
+  const d = RIASEC_DETAIL[type];
+  return `
+    <div style="margin:16px 0;">
+      <h3>${d.name}</h3>
+      <p>${d.desc}</p>
+      <p><strong>典型特质：</strong> ${d.traits.join("、")}</p>
+      <p><strong>适合职业：</strong> ${d.careers.join("、")}</p>
     </div>
   `;
 }
 
-
-/* ============================================================
-   Part 5：导出 PDF（可扩展）
-   ============================================================ */
-function exportPDF() {
-  alert("这里可以加入 PDF 导出插件，例如 html2pdf.js");
+/* ---- 输出职业锚文本 ---- */
+function renderAnchorDetail(type) {
+  const d = ANCHOR_DETAIL[type];
+  return `
+    <div style="margin:16px 0;">
+      <h3>${d.name}</h3>
+      <p>${d.desc}</p>
+      <p><strong>可能面临的风险：</strong> ${d.risks.join("、")}</p>
+      <p><strong>对应职业：</strong> ${d.careers.join("、")}</p>
+    </div>
+  `;
 }
 
+/* ---- 职业推荐：根据前三兴趣 + 锚 ---- */
+function renderCareerSuggestion(A1, A2, A3, anchor) {
+  const result = [
+    ...RIASEC_DETAIL[A1].careers.slice(0,3),
+    ...RIASEC_DETAIL[A2].careers.slice(0,2),
+    ...RIASEC_DETAIL[A3].careers.slice(0,2),
+    ...ANCHOR_DETAIL[anchor].careers.slice(0,3)
+  ];
 
-/* ============================================================
-   Part 6：无付费/无加微信 → 已完全删除
-   ============================================================ */
+  return `
+    <p style="font-size:17px;line-height:1.7;">
+      基于你在兴趣与职业锚中的表现，我们为你推荐以下方向：
+    </p>
+    <ul style="font-size:16px;line-height:1.8;">
+      ${Array.from(new Set(result)).map(c=>`<li>${c}</li>`).join("")}
+    </ul>
+  `;
+}
+</script>
 
+<!-- ============================================================
+   Part 6：图表 + PDF 输出 + 海报生成
+   ============================================================ -->
+<script>
+/* ---- 雷达图 ---- */
+function drawRadar() {
+  const ctx = document.getElementById("radarChart");
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ["R","I","A","S","E","C"],
+      datasets: [{
+        label: "RIASEC 得分",
+        data: [
+          scoresRIASEC.R,
+          scoresRIASEC.I,
+          scoresRIASEC.A,
+          scoresRIASEC.S,
+          scoresRIASEC.E,
+          scoresRIASEC.C
+        ],
+        backgroundColor: "rgba(30,96,255,0.2)",
+        borderColor: "#1e60ff"
+      }]
+    },
+    options: { responsive:true }
+  });
+}
 
-/* ============================================================
-   Part 7：初始化
-   ============================================================ */
+/* ---- 导出 PDF ---- */
+function exportPDF() {
+  const area = document.getElementById("reportArea");
+  html2pdf().set({
+    margin: 10,
+    filename: "职业测评报告.pdf",
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+  }).from(area).save();
+}
+
+/* ---- 海报 ---- */
+function generatePoster() {
+  const report = document.getElementById("reportArea");
+  html2canvas(report).then(canvas=>{
+    const posterArea = document.getElementById("posterArea");
+    posterArea.innerHTML = "";
+    posterArea.style.display = "block";
+    posterArea.appendChild(canvas);
+    alert("海报已生成，可右键保存。");
+  });
+}
+</script>
+
+<!-- ============================================================
+   页面初始化
+   ============================================================ -->
+<script>
 renderHome();
 </script>
 
