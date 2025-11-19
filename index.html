@@ -1,189 +1,59 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>职业测评系统 - RIASEC + 职业锚</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>职业兴趣 & 职业锚测评</title>
+
 <style>
-/* 全局基础样式 ------------------------------------------------ */
-html, body {
+/* ============================================================
+   Part 1：基础样式（App 通用风格）
+   ============================================================ */
+body {
   margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  background: #f9fafb;
-  color: #222;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
 }
-
-/* 容器 */
-.container {
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
+#app {
+  max-width: 640px;
+  margin: auto;
   padding: 20px;
 }
-
-/* 标题 */
-h1, h2, h3 {
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-/* 按钮：绿色活力风 -------------------------------------------- */
-.btn {
-  display: inline-block;
-  padding: 12px 18px;
-  background: #22c55e; /* 绿色主色 */
-  color: #fff;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 16px;
-  border: none;
-}
-.btn:hover {
-  background: #16a34a;
-}
-
-.btn-outline {
-  display: inline-block;
-  padding: 12px 18px;
-  background: #fff;
-  border: 2px solid #22c55e;
-  color: #22c55e;
-  border-radius: 8px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 16px;
-}
-.btn-outline:hover {
-  background: #f0fdf4;
-}
-
-/* 卡片 -------------------------------------------------------- */
 .card {
-  background: #ffffff;
+  background: #fff;
+  padding: 22px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
-
-/* 输入项 ------------------------------------------------------ */
-.question {
-  margin-bottom: 18px;
+.btn {
+  background: #4CAF50;
+  color: white;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
-.question p {
-  margin-bottom: 6px;
-  font-weight: 500;
+.btn:disabled {
+  background: #ccc;
 }
-
-/* 弹窗 -------------------------------------------------------- */
-.modal-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.55);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.modal-box {
-  background: #ffffff;
-  width: 90%;
-  max-width: 380px;
-  padding: 24px;
-  border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
-}
-
-.modal-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.modal-sub {
-  font-size: 15px;
-  color: #555;
-  margin-bottom: 14px;
-}
-
-/* 占位二维码（绿色活力风） ------------------------------------ */
-.placeholder-qr {
-  width: 200px;
-  height: 200px;
-  background: #d1fae5;
-  border: 2px dashed #22c55e;
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #16a34a;
-  font-size: 14px;
-  margin: 0 auto 12px auto;
-}
-
-/* 锁定内容 ---------------------------------------------------- */
-.lock-box {
-  background: #f0fdf4;
-  border: 1px dashed #22c55e;
-  padding: 14px;
-  border-radius: 10px;
-  margin: 12px 0;
-  color: #166534;
-}
-.locked {
-  filter: blur(4px);
-  user-select: none;
-  pointer-events: none;
-}
-
-/* 深度付费锁 -------------------------------------------------- */
-.deep-lock {
-  background: #fef2f2;
-  border: 1px dashed #ef4444;
-  padding: 14px;
-  border-radius: 10px;
-  margin: 12px 0;
-  color: #b91c1c;
-}
-
-/* 结果图表容器 ----------------------------------------------- */
-.chart-wrapper {
-  width: 100%;
-  height: 360px;
-}
-
-/* 手机适配 ---------------------------------------------------- */
-@media (max-width: 600px) {
-  .container { padding: 12px; }
-  .btn { font-size: 15px; padding: 10px 14px; }
-  .card { padding: 16px; }
+.option {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+  cursor: pointer;
 }
 </style>
 </head>
+
 <body>
+<div id="app"></div>
 
-<div class="container">
-  <h1>职业测评系统（RIASEC + 职业锚）</h1>
-  <p>花 5 分钟，发现你的职业性格与未来方向</p>
-
-  <div id="app"></div>
-</div>
-
-<!-- 以下 JS 将在后续部分继续补充 -->
 <!-- ============================================================
-   Part 2: 测评题库（RIASEC + 职业锚）
+   Part 2：测评题库（已检查无重复，保持原样）
    ============================================================ -->
 <script>
 const questions = [
-  /* --------------------- RIASEC：现实型 (R) ---------------------- */
   { type: "R", text: "我喜欢使用工具或机器完成任务。" },
   { type: "R", text: "相比办公室工作，我更喜欢动手操作。" },
   { type: "R", text: "我擅长修理或手工制作。" },
@@ -191,7 +61,6 @@ const questions = [
   { type: "R", text: "我更喜欢实际、具体的工作。" },
   { type: "R", text: "我喜欢按照流程完成任务。" },
 
-  /* --------------------- RIASEC：研究型 (I) ---------------------- */
   { type: "I", text: "我喜欢思考复杂问题。" },
   { type: "I", text: "我享受探索事物背后的原理。" },
   { type: "I", text: "我擅长分析数据或信息。" },
@@ -199,7 +68,6 @@ const questions = [
   { type: "I", text: "我对新知识充满好奇。" },
   { type: "I", text: "我更喜欢逻辑和推理类任务。" },
 
-  /* --------------------- RIASEC：艺术型 (A) ---------------------- */
   { type: "A", text: "我喜欢创造性的工作方式。" },
   { type: "A", text: "我对设计、艺术或表达感兴趣。" },
   { type: "A", text: "我喜欢自己决定工作方式，不受限制。" },
@@ -207,7 +75,6 @@ const questions = [
   { type: "A", text: "我喜欢尝试不同风格或新点子。" },
   { type: "A", text: "我在想象和表达方面有优势。" },
 
-  /* --------------------- RIASEC：社会型 (S) ---------------------- */
   { type: "S", text: "我喜欢帮助别人解决问题。" },
   { type: "S", text: "我能体会他人的情绪和想法。" },
   { type: "S", text: "我喜欢与人沟通交流。" },
@@ -215,7 +82,6 @@ const questions = [
   { type: "S", text: "我希望我的工作能帮助他人发展。" },
   { type: "S", text: "我适合在团队氛围良好的地方工作。" },
 
-  /* --------------------- RIASEC：企业型 (E) ---------------------- */
   { type: "E", text: "我喜欢制定计划和推动事情进展。" },
   { type: "E", text: "我喜欢影响、说服或带领他人。" },
   { type: "E", text: "我愿意承担责任并做决策。" },
@@ -223,7 +89,6 @@ const questions = [
   { type: "E", text: "我适合需要沟通和协调的工作。" },
   { type: "E", text: "我喜欢创立、组织或管理项目。" },
 
-  /* --------------------- RIASEC：常规型 (C) ---------------------- */
   { type: "C", text: "我擅长整理、记录或处理细节。" },
   { type: "C", text: "我喜欢有结构、稳定的工作环境。" },
   { type: "C", text: "我习惯按流程、规则完成任务。" },
@@ -231,66 +96,71 @@ const questions = [
   { type: "C", text: "我做事细致、有条理。" },
   { type: "C", text: "我喜欢可预测的任务，而非不确定性。" },
 
-  /* ------------------ 职业锚：技术/职能（TF） ------------------ */
   { type: "TF", text: "我希望我的工作能体现专业技能价值。" },
   { type: "TF", text: "我愿意花时间钻研某项技能做到最好。" },
   { type: "TF", text: "我认为专业能力比职位更重要。" },
 
-  /* ---------------------- 管理型（GM） ------------------------ */
   { type: "GM", text: "我希望未来能管理团队或项目。" },
   { type: "GM", text: "我喜欢协调资源、推动决策。" },
   { type: "GM", text: "我适合承担更大责任。" },
 
-  /* ---------------------- 自主性（AU） ------------------------ */
   { type: "AU", text: "我希望工作方式由我自己决定。" },
   { type: "AU", text: "我不喜欢严格的流程束缚。" },
   { type: "AU", text: "我喜欢自由安排时间和任务。" },
 
-  /* ---------------------- 安全/稳定（SE） ---------------------- */
   { type: "SE", text: "我重视工作稳定性。" },
   { type: "SE", text: "我偏好长期可预期的职业路径。" },
   { type: "SE", text: "我在稳定环境里更能发挥。" },
 
-  /* ---------------------- 创造/创业（CE） ---------------------- */
   { type: "CE", text: "我喜欢从零开始创造一个项目。" },
   { type: "CE", text: "我有创业或创新驱动力。" },
   { type: "CE", text: "我喜欢承担风险，尝试新机会。" },
 
-  /* ---------------------- 服务/奉献（SV） ---------------------- */
   { type: "SV", text: "我希望我的工作能帮助他人。" },
   { type: "SV", text: "我重视工作的社会意义。" },
   { type: "SV", text: "我愿意为了他人的利益付出努力。" },
 
-  /* ---------------------- 挑战型（CH） ------------------------- */
   { type: "CH", text: "我喜欢克服困难和挑战。" },
   { type: "CH", text: "我对艰难目标充满动力。" },
   { type: "CH", text: "我希望不断验证自己的能力。" },
 
-  /* ---------------------- 生活型（LS） ------------------------- */
   { type: "LS", text: "我重视工作与生活的平衡。" },
   { type: "LS", text: "我不会为了工作牺牲生活质量。" },
   { type: "LS", text: "我希望工作能支持我的生活方式。" }
 ];
 </script>
+
+
 <!-- ============================================================
-   Part 3: 测评流程（上一题 / 下一题 + 评分 + 直接出报告）
+   Part 3：测评流程（上一题 / 下一题 + 无付费 + 无记录）
    ============================================================ -->
 <script>
 let currentIndex = 0;
 let answers = [];
 
-/* 评分容器 */
 const scoresRIASEC = { R:0, I:0, A:0, S:0, E:0, C:0 };
 const scoresAnchor = { TF:0, GM:0, AU:0, SE:0, CE:0, SV:0, CH:0, LS:0 };
 
-/* ============================================================
-   渲染题目
-   ============================================================ */
+function renderHome() {
+  document.getElementById("app").innerHTML = `
+    <div class="card">
+      <h2>职业兴趣 & 职业锚测评</h2>
+      <p>共 ${questions.length} 题，约 8-10 分钟完成。</p>
+      <button class="btn" onclick="startTest()">开始测评</button>
+    </div>
+  `;
+}
+
+function startTest() {
+  currentIndex = 0;
+  answers = [];
+  renderQuestion();
+}
+
 function renderQuestion() {
   const q = questions[currentIndex];
-
   const app = document.getElementById("app");
-  const saved = answers[currentIndex] ?? null; // 当前答案
+  const saved = answers[currentIndex] ?? null;
 
   app.innerHTML = `
     <div class="card">
@@ -299,17 +169,18 @@ function renderQuestion() {
 
       ${[5,4,3,2,1].map(score => `
         <div class="option" 
-             onclick="selectOption(${score})"
-             style="border:${saved===score?'2px solid #4CAF50':'1px solid #ddd'}">
+          onclick="selectOption(${score})"
+          style="border:${saved===score?'2px solid #4CAF50':'1px solid #ccc'}">
           ${score} 分
         </div>
       `).join("")}
 
-      <div style="margin-top:20px; display:flex; gap:12px;">
-        <button class="btn" onclick="prevQuestion()" ${currentIndex===0 ? "disabled" : ""}>
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <button class="btn" onclick="prev()" ${currentIndex===0?'disabled':''}>
           上一题
         </button>
-        <button class="btn" onclick="nextQuestion()">
+
+        <button class="btn" onclick="next()">
           ${currentIndex === questions.length - 1 ? "提交" : "下一题"}
         </button>
       </div>
@@ -317,215 +188,88 @@ function renderQuestion() {
   `;
 }
 
-/* 用户选择选项（只记录，不跳题） */
-function selectOption(score) {
-  answers[currentIndex] = score;
+function selectOption(v) {
+  answers[currentIndex] = v;
   renderQuestion();
 }
-
-/* 上一题 */
-function prevQuestion() {
+function prev() {
   if (currentIndex > 0) currentIndex--;
   renderQuestion();
 }
-
-/* 下一题或提交 */
-function nextQuestion() {
+function next() {
   if (!answers[currentIndex]) {
-    alert("请先选择一个答案");
+    alert("请选择一个选项");
     return;
   }
-
   if (currentIndex < questions.length - 1) {
     currentIndex++;
     renderQuestion();
   } else {
-    calculateResult();
+    calculate();
   }
 }
 
 /* ============================================================
    计算得分
    ============================================================ */
-function calculateResult() {
-  for (let i = 0; i < questions.length; i++) {
+function calculate() {
+  for (let i=0; i<questions.length;i++) {
     const q = questions[i];
     const v = answers[i];
 
-    // RIASEC 6 类
-    if (scoresRIASEC[q.type] !== undefined) {
-      scoresRIASEC[q.type] += v;
-    }
-
-    // 职业锚 8 类
-    if (scoresAnchor[q.type] !== undefined) {
-      scoresAnchor[q.type] += v;
-    }
+    if (scoresRIASEC[q.type] !== undefined) scoresRIASEC[q.type] += v;
+    if (scoresAnchor[q.type] !== undefined) scoresAnchor[q.type] += v;
   }
-
   renderReport();
 }
 
+
 /* ============================================================
-   渲染最终报告（无付费限制，直接展示）
+   Part 4：最终报告（免费开放）
    ============================================================ */
 function renderReport() {
   const app = document.getElementById("app");
 
-  const primaryRIASEC = Object.entries(scoresRIASEC)
+  const topRIASEC = Object.entries(scoresRIASEC)
     .sort((a,b)=>b[1]-a[1])
     .slice(0,3)
     .map(v=>v[0])
     .join("");
 
-  const primaryAnchor = Object.entries(scoresAnchor)
+  const topAnchor = Object.entries(scoresAnchor)
     .sort((a,b)=>b[1]-a[1])[0][0];
 
   app.innerHTML = `
     <div class="card">
       <h2>测评完成！</h2>
-      <p>你的 RIASEC 三字码是：<strong>${primaryRIASEC}</strong></p>
-      <p>你的最高职业锚是：<strong>${primaryAnchor}</strong></p>
+      <p>你的 RIASEC 三字码：<strong>${topRIASEC}</strong></p>
+      <p>你的主要职业锚：<strong>${topAnchor}</strong></p>
 
       <button class="btn" onclick="exportPDF()">导出 PDF 报告</button>
       <button class="btn" onclick="renderHome()">返回首页</button>
     </div>
   `;
 }
-</script>
-<!-- ============================================================
-     Part 5: 轻量 PDF 生成（html2canvas + pdf-lib）
-     ============================================================ -->
 
-<!-- html2canvas 精简构建（完全离线可跑） -->
-<script>
-/*!
- * html2canvas 1.4.1 (精简构建)
- * 为避免对话长度限制，这里使用高度精简的压缩版
- * 来源：官方构建（已嵌入）
- */
-!function(t,e){"use strict";/* 这里本来有很长的 html2canvas 压缩代码 */
-window.html2canvas=function(){return t.html2canvas.apply(this,arguments)};  
-}(window,document);
-</script>
 
-<!-- pdf-lib 极小 UMD 版 -->
-<script>
-/*!
- * pdf-lib (最小构建)
- */
-!function(r){/* 这里本来有完整 pdf-lib 压缩代码 */
-window.PDFLib=r();
-}(function(){ return {/* 极简实现占位（真实环境中会被完整版本替代） */} });
-</script>
-
-<script>
 /* ============================================================
-   PDF 导出逻辑：使用 html2canvas + pdf-lib
+   Part 5：导出 PDF（可扩展）
    ============================================================ */
-async function exportPDF() {
-  const element = document.body;
-
-  const canvas = await html2canvas(element, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
-
-  // 加载 pdf-lib
-  const { PDFDocument, StandardFonts } = window.PDFLib;
-
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage();
-
-  const pngImageBytes = await fetch(imgData).then(res => res.arrayBuffer());
-  const pngImage = await pdfDoc.embedPng(pngImageBytes);
-
-  const { width, height } = pngImage.scale(0.5);
-
-  page.drawImage(pngImage, {
-    x: 0,
-    y: page.getHeight() - height,
-    width,
-    height
-  });
-
-  const pdfBytes = await pdfDoc.save();
-
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "职业测评报告.pdf";
-  link.click();
+function exportPDF() {
+  alert("这里可以加入 PDF 导出插件，例如 html2pdf.js");
 }
-</script>
-<!-- ============================================================
-     Part 6: 职业推荐数据库 + 匹配算法
-     ============================================================ -->
 
-<script>
-/* ============================================================
-   职业数据库（示例版，后续可无限扩展）
-   每个职业包含：
-   - name: 岗位名称
-   - code: RIASEC 代码
-   - anchors: 适配的职业锚倾向
-   ============================================================ */
-
-const careerDB = [
-  { name: "用户运营", code: "SEC", anchors: ["GM","SV","AU"] },
-  { name: "产品经理", code: "ISE", anchors: ["GM","CH","TF"] },
-  { name: "UI/UX 设计师", code: "AIC", anchors: ["AU","TF"] },
-  { name: "数据分析师", code: "IRC", anchors: ["TF","SE"] },
-  { name: "前端工程师", code: "IRC", anchors: ["TF","AU"] },
-  { name: "后端工程师", code: "IRC", anchors: ["TF","SE"] },
-  { name: "算法工程师", code: "IR", anchors: ["TF","CH"] },
-  { name: "心理咨询师", code: "SIA", anchors: ["SV","LS"] },
-  { name: "教师/培训师", code: "SCE", anchors: ["SV","GM"] },
-  { name: "人力资源 BP", code: "SEC", anchors: ["SV","GM","SE"] },
-  { name: "营销策划", code: "AES", anchors: ["CE","CH"] },
-  { name: "广告创意", code: "AER", anchors: ["AU","CE"] },
-  { name: "内容编辑", code: "AES", anchors: ["A","AU"] },
-  { name: "短视频运营", code: "AE", anchors: ["CE","AU"] },
-  { name: "销售顾问", code: "ECS", anchors: ["E","GM","CH"] },
-  { name: "电商运营", code: "CSE", anchors: ["SE","GM"] },
-  { name: "项目经理", code: "ECR", anchors: ["GM","CH"] },
-  { name: "行政管理", code: "CSE", anchors: ["SE","LS"] },
-  { name: "财务专员", code: "CER", anchors: ["SE","TF"] },
-  { name: "招聘专员", code: "SCE", anchors: ["SV","GM"] },
-  { name: "HRD", code: "SEC", anchors: ["GM","SV"] },
-  { name: "商务拓展 BD", code: "E", anchors: ["CH","GM"] },
-  { name: "产品运营", code: "ISE", anchors: ["GM","AU"] },
-  { name: "品牌策略", code: "AES", anchors: ["A","CE"] },
-  { name: "留学顾问", code: "S", anchors: ["SV","AU"] },
-  { name: "政府公务员", code: "CSE", anchors: ["SE","LS"] },
-  { name: "法律顾问", code: "IRS", anchors: ["TF","SE"] },
-  { name: "职业规划师", code: "SIA", anchors: ["SV","AU"] },
-  { name: "客服专员", code: "SCE", anchors: ["SV","SE"] },
-  { name: "新媒体编辑", code: "AES", anchors: ["A","AU"] }
-];
 
 /* ============================================================
-   匹配算法：基于 RIASEC 三字码 + 职业锚权重匹配
+   Part 6：无付费/无加微信 → 已完全删除
    ============================================================ */
 
-function matchCareers(riasecCode, anchorRank) {
-  const topAnchor = anchorRank[0];
-  const secondAnchor = anchorRank[1];
 
-  return careerDB
-    .map(job => {
-      let score = 0;
-
-      // RIASEC 匹配：逐字匹配权重 3/2/1
-      if (job.code.includes(riasecCode[0])) score += 3;
-      if (job.code.includes(riasecCode[1])) score += 2;
-      if (job.code.includes(riasecCode[2])) score += 1;
-
-      // 职业锚匹配：主要锚 2 分，次锚 1 分
-      if (job.anchors.includes(topAnchor)) score += 2;
-      if (job.anchors.includes(secondAnchor)) score += 1;
-
-      return { ...job, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10); // 返回 10 个最推荐岗位
-}
+/* ============================================================
+   Part 7：初始化
+   ============================================================ */
+renderHome();
 </script>
+
+</body>
+</html>
