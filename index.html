@@ -177,11 +177,11 @@ h1, h2, h3 {
   <div id="app"></div>
 </div>
 
-<!-- 以下 JS 将在后续部分继续补充 --><script>
-/* ============================================================
+<!-- 以下 JS 将在后续部分继续补充 -->
+<!-- ============================================================
    Part 2: 测评题库（RIASEC + 职业锚）
-   ============================================================ */
-
+   ============================================================ -->
+<script>
 const questions = [
   /* --------------------- RIASEC：现实型 (R) ---------------------- */
   { type: "R", text: "我喜欢使用工具或机器完成任务。" },
@@ -231,359 +231,168 @@ const questions = [
   { type: "C", text: "我做事细致、有条理。" },
   { type: "C", text: "我喜欢可预测的任务，而非不确定性。" },
 
-  /* ===================== 职业锚 18 题（Schein） ===================== */
-
-  /* ---------------- 技术/职能型（TF） ---------------- */
+  /* ------------------ 职业锚：技术/职能（TF） ------------------ */
   { type: "TF", text: "我希望我的工作能体现专业技能价值。" },
   { type: "TF", text: "我愿意花时间钻研某项技能做到最好。" },
   { type: "TF", text: "我认为专业能力比职位更重要。" },
 
-  /* ---------------- 管理型（GM） ---------------- */
+  /* ---------------------- 管理型（GM） ------------------------ */
   { type: "GM", text: "我希望未来能管理团队或项目。" },
   { type: "GM", text: "我喜欢协调资源、推动决策。" },
   { type: "GM", text: "我适合承担更大责任。" },
 
-  /* ---------------- 自主性（AU） ---------------- */
+  /* ---------------------- 自主性（AU） ------------------------ */
   { type: "AU", text: "我希望工作方式由我自己决定。" },
   { type: "AU", text: "我不喜欢严格的流程束缚。" },
   { type: "AU", text: "我喜欢自由安排时间和任务。" },
 
-  /* ---------------- 安全/稳定（SE） ---------------- */
+  /* ---------------------- 安全/稳定（SE） ---------------------- */
   { type: "SE", text: "我重视工作稳定性。" },
   { type: "SE", text: "我偏好长期可预期的职业路径。" },
   { type: "SE", text: "我在稳定环境里更能发挥。" },
 
-  /* ---------------- 创造/创业（CE） ---------------- */
+  /* ---------------------- 创造/创业（CE） ---------------------- */
   { type: "CE", text: "我喜欢从零开始创造一个项目。" },
   { type: "CE", text: "我有创业或创新驱动力。" },
   { type: "CE", text: "我喜欢承担风险，尝试新机会。" },
 
-  /* ---------------- 服务/奉献（SV） ---------------- */
+  /* ---------------------- 服务/奉献（SV） ---------------------- */
   { type: "SV", text: "我希望我的工作能帮助他人。" },
   { type: "SV", text: "我重视工作的社会意义。" },
   { type: "SV", text: "我愿意为了他人的利益付出努力。" },
 
-  /* ---------------- 挑战型（CH） ---------------- */
+  /* ---------------------- 挑战型（CH） ------------------------- */
   { type: "CH", text: "我喜欢克服困难和挑战。" },
   { type: "CH", text: "我对艰难目标充满动力。" },
   { type: "CH", text: "我希望不断验证自己的能力。" },
 
-  /* ---------------- 生活型（LS） ---------------- */
+  /* ---------------------- 生活型（LS） ------------------------- */
   { type: "LS", text: "我重视工作与生活的平衡。" },
   { type: "LS", text: "我不会为了工作牺牲生活质量。" },
   { type: "LS", text: "我希望工作能支持我的生活方式。" }
 ];
 </script>
+<!-- ============================================================
+   Part 3: 测评流程（上一题 / 下一题 + 评分 + 直接出报告）
+   ============================================================ -->
 <script>
-/* ============================================================
-   Part 3: 题目渲染 + 测评逻辑 + 得分计算
-   ============================================================ */
-
 let currentIndex = 0;
 let answers = [];
 
-/* RIASEC 六维分数 */
-let scoresRIASEC = {
-  R: 0, I: 0, A: 0, S: 0, E: 0, C: 0
-};
-
-/* 职业锚八维分数 */
-let scoresAnchor = {
-  TF: 0, GM: 0, AU: 0, SE: 0,
-  CE: 0, SV: 0, CH: 0, LS: 0
-};
+/* 评分容器 */
+const scoresRIASEC = { R:0, I:0, A:0, S:0, E:0, C:0 };
+const scoresAnchor = { TF:0, GM:0, AU:0, SE:0, CE:0, SV:0, CH:0, LS:0 };
 
 /* ============================================================
-   渲染当前题目
+   渲染题目
    ============================================================ */
 function renderQuestion() {
   const q = questions[currentIndex];
+
   const app = document.getElementById("app");
+  const saved = answers[currentIndex] ?? null; // 当前答案
 
   app.innerHTML = `
     <div class="card">
       <h2>第 ${currentIndex + 1} / ${questions.length} 题</h2>
-      <p style="font-size: 18px; margin-bottom: 18px;">${q.text}</p>
+      <p>${q.text}</p>
 
-      <div style="margin-top:20px;">
-        <button class="btn" onclick="selectAnswer(1)">非常符合</button>
-        <button class="btn" style="background:#4ade80;" onclick="selectAnswer(0.8)">比较符合</button>
-        <button class="btn" style="background:#86efac;" onclick="selectAnswer(0.6)">一般</button>
-        <button class="btn" style="background:#bbf7d0;" onclick="selectAnswer(0.4)">不太符合</button>
-        <button class="btn-outline" onclick="selectAnswer(0.2)">完全不符合</button>
+      ${[5,4,3,2,1].map(score => `
+        <div class="option" 
+             onclick="selectOption(${score})"
+             style="border:${saved===score?'2px solid #4CAF50':'1px solid #ddd'}">
+          ${score} 分
+        </div>
+      `).join("")}
+
+      <div style="margin-top:20px; display:flex; gap:12px;">
+        <button class="btn" onclick="prevQuestion()" ${currentIndex===0 ? "disabled" : ""}>
+          上一题
+        </button>
+        <button class="btn" onclick="nextQuestion()">
+          ${currentIndex === questions.length - 1 ? "提交" : "下一题"}
+        </button>
       </div>
     </div>
   `;
 }
 
-/* ============================================================
-   用户选择答案
-   ============================================================ */
-function selectAnswer(value) {
-  const q = questions[currentIndex];
+/* 用户选择选项（只记录，不跳题） */
+function selectOption(score) {
+  answers[currentIndex] = score;
+  renderQuestion();
+}
 
-  answers.push({ type: q.type, value });
+/* 上一题 */
+function prevQuestion() {
+  if (currentIndex > 0) currentIndex--;
+  renderQuestion();
+}
 
-  // 累加分数
-  if (scoresRIASEC[q.type] !== undefined) {
-    scoresRIASEC[q.type] += value;
+/* 下一题或提交 */
+function nextQuestion() {
+  if (!answers[currentIndex]) {
+    alert("请先选择一个答案");
+    return;
   }
-  if (scoresAnchor[q.type] !== undefined) {
-    scoresAnchor[q.type] += value;
-  }
 
-  currentIndex++;
-
-  // 全部答完 → 显示结果
-  if (currentIndex >= questions.length) {
-    showResults();
-  } else {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
     renderQuestion();
+  } else {
+    calculateResult();
   }
 }
 
 /* ============================================================
-   得分排序函数
+   计算得分
    ============================================================ */
-function sortObjectDescending(obj) {
-  return Object.entries(obj)
-    .sort((a, b) => b[1] - a[1])
-    .map(item => item[0]);
-}
+function calculateResult() {
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    const v = answers[i];
 
-/* ============================================================
-   生成结果页（基础版）
-   ============================================================ */
-function showResults() {
-  const topRIASEC = sortObjectDescending(scoresRIASEC);
-  const topAnchor = sortObjectDescending(scoresAnchor);
-
-  const riasecCode = topRIASEC.slice(0, 3).join("");
-
-  /* 保存到 localStorage（历史记录） */
-  const record = {
-    time: new Date().toISOString(),
-    riasec: riasecCode,
-    scoresRIASEC,
-    scoresAnchor
-  };
-
-  let history = JSON.parse(localStorage.getItem("assessment_history") || "[]");
-  history.push(record);
-  localStorage.setItem("assessment_history", JSON.stringify(history));
-
-  /* 渲染基础结果 */
-  const app = document.getElementById("app");
-  app.innerHTML = `
-    <div class="card">
-      <h2>测评结果</h2>
-
-      <p>你的 RIASEC 代码（前三）：</p>
-      <h3 style="font-size: 26px; color:#22c55e;">${riasecCode}</h3>
-
-      <p>职业锚排名（前 2）：</p>
-      <h3 style="color:#16a34a;">${topAnchor[0]}、${topAnchor[1]}</h3>
-
-      <div class="chart-wrapper">
-        <canvas id="riasecChart"></canvas>
-      </div>
-
-      <button class="btn" onclick="showFullReport()">查看详细报告</button>
-    </div>
-  `;
-
-  setTimeout(drawRIASECChart, 200);
-}
-
-/* ============================================================
-   图表绘制（后续 Part 4 会添加 Chart.js）
-   ============================================================ */
-function drawRIASECChart() {
-  // Chart.js 会在 Part 4 注入，这里占位
-}
-</script>
-<!-- ============================================================
-     Part 4: Chart.js (Base64 内嵌) + 报告页面 + 解锁逻辑
-     ============================================================ -->
-
-<script>
-/* -------------------------------------------------------------
-   注入本地 Chart.js (Base64)
-   ------------------------------------------------------------- */
-(function injectChartJS() {
-  /* 这是 Chart.js 4.x 的精简构建版本，已压缩并 Base64 编码 */
-  const base64 = `
-IyE...（此处为示例，实际会很长很长，不完整不能运行） 
-`;
-
-  const script = document.createElement("script");
-  script.innerHTML = atob(base64);
-  document.head.appendChild(script);
-})();
-
-/* ============================================================
-   绘制 RIASEC 雷达图（在 showResults() 调用）
-   ============================================================ */
-function drawRIASECChart() {
-  const ctx = document.getElementById("riasecChart");
-
-  new Chart(ctx, {
-    type: "radar",
-    data: {
-      labels: ["R 现实", "I 研究", "A 艺术", "S 社会", "E 企业", "C 常规"],
-      datasets: [{
-        label: "RIASEC 得分",
-        data: [
-          scoresRIASEC.R,
-          scoresRIASEC.I,
-          scoresRIASEC.A,
-          scoresRIASEC.S,
-          scoresRIASEC.E,
-          scoresRIASEC.C
-        ],
-        backgroundColor: "rgba(34,197,94,0.2)",
-        borderColor: "#22c55e",
-        borderWidth: 2,
-        pointBackgroundColor: "#16a34a"
-      }]
-    },
-    options: {
-      scales: {
-        r: {
-          min: 0,
-          ticks: { display: false },
-          grid: { color: "#d1fae5" },
-          pointLabels: { font: { size: 14 } }
-        }
-      }
+    // RIASEC 6 类
+    if (scoresRIASEC[q.type] !== undefined) {
+      scoresRIASEC[q.type] += v;
     }
-  });
+
+    // 职业锚 8 类
+    if (scoresAnchor[q.type] !== undefined) {
+      scoresAnchor[q.type] += v;
+    }
+  }
+
+  renderReport();
 }
 
 /* ============================================================
-   渲染“详细报告”页面
+   渲染最终报告（无付费限制，直接展示）
    ============================================================ */
-function showFullReport() {
+function renderReport() {
   const app = document.getElementById("app");
 
-  /* 检查是否已解锁私域 */
-  const unlockedWeChat = localStorage.getItem("unlock_wechat") === "1";
-  const unlockedPaid = localStorage.getItem("unlock_paid") === "1";
+  const primaryRIASEC = Object.entries(scoresRIASEC)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
+    .map(v=>v[0])
+    .join("");
+
+  const primaryAnchor = Object.entries(scoresAnchor)
+    .sort((a,b)=>b[1]-a[1])[0][0];
 
   app.innerHTML = `
     <div class="card">
-      <h2>详细报告</h2>
+      <h2>测评完成！</h2>
+      <p>你的 RIASEC 三字码是：<strong>${primaryRIASEC}</strong></p>
+      <p>你的最高职业锚是：<strong>${primaryAnchor}</strong></p>
 
-      <h3>一、RIASEC 代码解析</h3>
-      <p>你的 Holland 类型组合揭示你偏好的工作风格与职业特质。</p>
-
-      <div id="section-wechat" class="${unlockedWeChat ? "" : "locked"}">
-        <h3>二、你的核心优势（需添加微信解锁）</h3>
-        <p>基于你的性格组合，我们识别出你的关键优势…</p>
-
-        <h3>三、你的潜在风险（需添加微信解锁）</h3>
-        <p>在职业发展中，你需要留意的潜在盲点…</p>
-
-        <h3>四、适合的行业方向（需添加微信解锁）</h3>
-        <p>根据你的类型，我们建议你重点关注以下行业…</p>
-      </div>
-
-      ${unlockedWeChat ? "" : `
-        <div class="lock-box">
-          <p>添加微信后可立即解锁更多内容</p>
-          <button class="btn" onclick="openWeChatModal()">添加微信解锁</button>
-        </div>
-      `}
-
-      <h3>五、深度职业报告（¥49 解锁）</h3>
-
-      <div id="deep-section" class="${unlockedPaid ? "" : "locked"}">
-        <h3>你的核心天赋</h3>
-        <p>我们根据 RIASEC + 职业锚综合模型，识别你的长期优势轨迹…</p>
-
-        <h3>未来 1–3 年发展建议</h3>
-        <p>我们会根据你的潜力区间给出精确职业路线…</p>
-
-        <h3>精准岗位建议</h3>
-        <p>基于目标行业，为你匹配具体岗位…</p>
-      </div>
-
-      ${unlockedPaid ? "" : `
-        <div class="deep-lock">
-          <p>支付 ¥49 可解锁完整深度报告</p>
-          <button class="btn" onclick="openPayModal()">¥49 解锁深度报告</button>
-        </div>
-      `}
-    </div>
-
-    <div style="margin-top:20px;">
-      <button class="btn-outline" onclick="location.reload()">重新测评</button>
+      <button class="btn" onclick="exportPDF()">导出 PDF 报告</button>
+      <button class="btn" onclick="renderHome()">返回首页</button>
     </div>
   `;
 }
-
-/* ============================================================
-   弹窗：添加微信解锁
-   ============================================================ */
-function openWeChatModal() {
-  wechatModal.style.display = "flex";
-}
-
-function closeWeChatModal() {
-  wechatModal.style.display = "none";
-}
-
-function confirmWeChatUnlock() {
-  localStorage.setItem("unlock_wechat", "1");
-  closeWeChatModal();
-  showFullReport();
-}
-
-/* ============================================================
-   弹窗：付费解锁（¥49）
-   ============================================================ */
-function openPayModal() {
-  payModal.style.display = "flex";
-}
-
-function closePayModal() {
-  payModal.style.display = "none";
-}
-
-function confirmPayUnlock() {
-  localStorage.setItem("unlock_paid", "1");
-  closePayModal();
-  showFullReport();
-}
 </script>
-
-<!-- ======================= 微信解锁弹窗 ======================= -->
-<div id="wechatModal" class="modal-mask">
-  <div class="modal-box">
-    <div class="modal-title">添加微信解锁</div>
-    <div class="modal-sub">扫码添加顾问微信，立即解锁更多内容</div>
-
-    <div class="placeholder-qr">占位二维码</div>
-
-    <button class="btn" onclick="confirmWeChatUnlock()">我已添加微信</button>
-    <div style="height:10px;"></div>
-    <button class="btn-outline" onclick="closeWeChatModal()">关闭</button>
-  </div>
-</div>
-
-<!-- ======================= 付费解锁弹窗 ======================= -->
-<div id="payModal" class="modal-mask">
-  <div class="modal-box">
-    <div class="modal-title">¥49 解锁深度职业报告</div>
-    <div class="modal-sub">扫码支付，立即解锁全文与 PDF 报告</div>
-
-    <div class="placeholder-qr">占位支付二维码</div>
-
-    <button class="btn" onclick="confirmPayUnlock()">我已完成付款</button>
-    <div style="height:10px;"></div>
-    <button class="btn-outline" onclick="closePayModal()">关闭</button>
-  </div>
-</div>
 <!-- ============================================================
      Part 5: 轻量 PDF 生成（html2canvas + pdf-lib）
      ============================================================ -->
@@ -720,80 +529,3 @@ function matchCareers(riasecCode, anchorRank) {
     .slice(0, 10); // 返回 10 个最推荐岗位
 }
 </script>
-<!-- ============================================================
-     Part 7: 页面入口渲染 + 初始化绑定
-     ============================================================ -->
-
-<script>
-/* ============================================================
-   页面入口（首页）
-   ============================================================ */
-function renderHome() {
-  const app = document.getElementById("app");
-
-  app.innerHTML = `
-    <div class="card">
-      <h2>职业测评系统（RIASEC + 职业锚）</h2>
-      <p>用 5 分钟精准识别你的职业兴趣与优势，生成你的专属报告。</p>
-
-      <div style="margin-top: 20px;">
-        <button class="btn" onclick="startAssessment()">开始测评</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>历史测评记录</h3>
-      <div id="historyList"></div>
-    </div>
-  `;
-
-  renderHistory();
-}
-
-/* ============================================================
-   渲染历史记录
-   ============================================================ */
-function renderHistory() {
-  const history = JSON.parse(localStorage.getItem("assessment_history") || "[]");
-  const box = document.getElementById("historyList");
-
-  if (history.length === 0) {
-    box.innerHTML = "<p>暂无记录</p>";
-    return;
-  }
-
-  box.innerHTML = history
-    .map(v => {
-      const date = new Date(v.time).toLocaleString("zh-CN");
-      return `<p>${date} — RIASEC：${v.riasec}</p>`;
-    })
-    .join("");
-}
-
-/* ============================================================
-   进入测评
-   ============================================================ */
-function startAssessment() {
-  currentIndex = 0;
-  answers = [];
-  for (const k in scoresRIASEC) scoresRIASEC[k] = 0;
-  for (const k in scoresAnchor) scoresAnchor[k] = 0;
-  renderQuestion();
-}
-
-/* ============================================================
-   DOM 引用（弹窗）
-   ============================================================ */
-const wechatModal = document.getElementById("wechatModal");
-const payModal = document.getElementById("payModal");
-
-/* ============================================================
-   初始化（加载首页）
-   ============================================================ */
-window.onload = () => {
-  renderHome();
-};
-</script>
-
-</body>
-</html>
